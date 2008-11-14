@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title>jQuery - fieldSelection</title>
+	<meta name="author" content="Alex Brem" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<script type="text/javascript" src="jquery-latest.pack.js"></script>
+	<script type="text/javascript" src="jquery-fieldselection.js"></script>
+	<script type="text/javascript"><!--//--><![CDATA[//><!--
+
+		$(document).ready(function(){
+
+			// install the event handler for #debug #output
+			$('input[@type="text"], textarea').keyup(update).mousedown(update).mousemove(update).mouseup(update);
+			
+			// assign the field1 paste event
+			$('.replace').click(function(e){
+				$('#field1').replaceSelection($(this).title());
+				e.preventDefault();
+			});
+
+		});
+		
+		/*
+			this function handles #debug #output
+		 */
+
+		function update(e) {
+			
+			// here we fetch our text range object
+			var range = $(this).getSelection();
+
+			// just dump the values
+			$('#output').html(
+				"id: " + this.id + "\n" +
+				"start: " + range.start + "\n" +
+				"length: " + range.length + "\n" +
+				"end: " + range.end + "\n" + 
+				"selected text:\n<span class=\"txt\">" + (($('#ws').get(0).checked) ? range.text.whitespace() : range.text) + "</span>\n"
+			);
+		
+		}
+		
+		/*
+			this code block is not needed for jQuery fieldSelection
+			this is just to visualize white space in #debug #output
+		 */
+
+		String.prototype.whitespace = (function() {
+			
+			if (!RegExp.escape) { 
+			  RegExp.escape = (function() { // RegExp.escape by Simon Wilson & Mark Wubben
+			    var specials = [ '/', '.', '*', '+', '?', '|', '(', ')', '[', ']', '{', '}', '\\' ];
+			    sRE = new RegExp( '(\\' + specials.join('|\\') + ')', 'g' );
+			    return function(text) { return text.replace(sRE, '\\$1') }
+			  })();
+
+			}
+			
+			var ws = { "\r\n": "¶", "\n": "¶", "\r": "¶", "\t": "&raquo;", " ": "&middot;" };
+			
+			return ($.browser.msie) ? function() {
+				// &#8203; to break up our whitespaces doesn't work in IE (it prints a block)
+				// but nevertheless he doesn't need it, because he has "word-wrap:break-word;"
+				// and therefore he gets his own function
+				var s = this;
+				$.each(ws, function(i){ s = s.replace(new RegExp(RegExp.escape(i), 'g'), this) });
+				return s;
+			} : function () {
+				var s = this;
+				$.each(ws, function(i){ s = s.replace(new RegExp(RegExp.escape(i), 'g'), this + "\u200b") });
+				return s;
+			}
+			
+		})();
+		
+		//--><!]]>
+	
+	</script>
+	<style type="text/css">
+		body {
+			background:#cc9;
+			color:#653;
+			font:1em Georgia, "Courier New", serif;
+		}
+		
+		h1 { color:#430 }
+
+		h1 .nuf {
+			background-color:HighlightText;
+			color:Highlight;
+		}
+		
+		h1 .fun {
+			background-color:Highlight;
+			color:HighlightText;
+		}
+		
+		a:link { color:#993 }
+		a:visited { color:#660 }
+		
+		#content { position:relative }
+	
+		#debug {
+			position:absolute;
+			top:5%;
+			left:50%;
+			width:45%;
+			min-width:200px;
+			min-height:50px;
+			padding:4px;
+			background:#ee9;
+			border:1px solid #996;
+		}
+		
+		#output .txt {
+			background:#f99;
+			display:inline;
+			color:black;
+		}
+		
+		pre {
+			white-space:pre-wrap;
+			white-space:-moz-pre-wrap;
+			white-space:-pre-wrap;
+			white-space:-o-pre-wrap;
+			word-wrap:break-word;
+		}
+		
+		label {
+			color:#663;
+			font-size:80%;
+		}
+		
+		input[type='text'], textarea {
+			display:block;
+			width:300px;
+			margin-bottom:8px;
+		}
+
+		/* bastard. */		
+		* html input, * html textarea { display:block; }
+		
+	</style>
+</head>
+<body>
+	<h1>jQuery plugin: <span class="nuf">field</span><span class="fun">Selection</span></h1>
+	<p>
+		version <strong>0.1.0</strong> &ndash; 2006-12-16<br />
+		source: <a href="jquery-fieldselection.js">jquery-fieldselection.js</a> &middot; <a href="jquery-fieldselection.pack.js">jquery-fieldselection.pack.js</a><br />
+		this test: <a href="test.html">test.html</a> (tested with <a href="http://jQuery.com/">jQuery</a> 1.0.2+)
+	</p>
+	<p>Read more about the subject in <a href="http://blog.0xab.cd/2006/12/16/jquery-plugin-fieldselection/">my related blog entry</a>.</p>
+	<hr />
+	<div id="content">
+		<div id="debug">
+			<input id="ws" name="ws" type="checkbox" /><label>show whitespace?</label>
+			<pre id="output"></pre>
+		</div>
+		<p>
+			<a class="replace" href="#" title="foo">replace selection in #field1</a>
+		</p>
+		<fieldset>
+			<label for="field1">field1:</label><input id="field1" name="field1" type="text" value="this is an input field" />
+			<label for="area1">area1:</label><textarea id="area1" name="area1">textarea: foo bar baz</textarea>
+			<label for="field2">field2:</label><input id="field2" name="field2" type="text" value="this is another input field" />
+			<label for="area2">area2</label><textarea id="area2" name="area1">this	is	a multi-
+line-
+break	test</textarea>
+		</fieldset>
+	</div>
+</body>
+</html>
