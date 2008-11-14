@@ -34,11 +34,14 @@
 
 			// just dump the values
 			$('#output').html(
+			  "hexdump:\n" + hexdump(this.value, range.start, (range.end != range.start) ? range.end - 1 : range.end) + "\n\n" +
 				"id: " + this.id + "\n" +
 				"start: " + range.start + "\n" +
 				"length: " + range.length + "\n" +
-				"end: " + range.end + "\n" + 
-				"selected text:\n<span class=\"txt\">" + (($('#ws').get(0).checked) ? range.text.whitespace() : range.text) + "</span>\n"
+        "end: " + range.end + "\n" +
+        ((typeof range['row'] != 'undefined') ? "caret row: " + range.row + "\n" : '') +
+        ((typeof range['col'] != 'undefined') ? "caret col: " + range.col + "\n" : '') +
+        "selected text:\n<span class=\"txt\">" + (($('#ws').get(0).checked) ? range.text.whitespace() : range.text) + "</span>\n\n"
 			);
 		
 		}
@@ -53,7 +56,7 @@
 			if (!RegExp.escape) { 
 			  RegExp.escape = (function() { // RegExp.escape by Simon Wilson & Mark Wubben
 			    var specials = [ '/', '.', '*', '+', '?', '|', '(', ')', '[', ']', '{', '}', '\\' ];
-			    sRE = new RegExp( '(\\' + specials.join('|\\') + ')', 'g' );
+			    var sRE = new RegExp( '(\\' + specials.join('|\\') + ')', 'g' );
 			    return function(text) { return text.replace(sRE, '\\$1') }
 			  })();
 
@@ -75,6 +78,39 @@
 			}
 			
 		})();
+
+		function hexdump(txt, hi_f, hi_t) {
+			var hex = '', tmp;
+
+			if (txt) {
+
+				for (var i = 0, j = txt.length; i <= j; i++) {
+
+					tmp = txt.charCodeAt(i).toString(16);
+
+					if (i == hi_f)
+						hex += '<span class="hi">';
+
+					if (i < txt.length)
+						hex += ( (tmp.length == 2) ? tmp : '0' + tmp );
+					else
+						hex += "&nbsp;&nbsp;";
+
+					if (i == hi_t)
+						hex += '</span>';
+
+					if ((i+1) % 16 == 0)
+						hex += "\n";
+					else
+						hex += ' ';
+
+				}
+
+			}
+
+			return hex;
+
+		}
 		
 		//--><!]]>
 	
@@ -120,6 +156,11 @@
 			display:inline;
 			color:black;
 		}
+
+  	#output .hi {
+  		background:#cc9;
+  		color:#630;
+  	}
 		
 		pre {
 			white-space:pre-wrap;
