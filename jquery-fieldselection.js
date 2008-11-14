@@ -1,5 +1,5 @@
 /*
- * jQuery plugin: fieldSelection - v0.1.0 - last change: 2006-12-16
+ * jQuery plugin: fieldSelection - v0.1.1 - last change: 2006-12-16
  * (c) 2006 Alex Brem <alex@0xab.cd> - http://blog.0xab.cd
  */
 
@@ -9,7 +9,7 @@
 
 		getSelection: function() {
 
-			var e = (typeof this.id == 'function') ? this.get(0) : this;
+			var e = (this.jquery) ? this[0] : this;
 
 			return (
 
@@ -25,7 +25,7 @@
 					e.focus();
 
 					var r = document.selection.createRange();
-					if (r == null) {
+					if (r === null) {
 						return { start: 0, end: e.value.length, length: 0 }
 					}
 
@@ -38,9 +38,7 @@
 				}) ||
 
 				/* browser not supported */
-				function() {
-					return { start: 0, end: e.value.length, length: 0 };
-				}
+				function() { return null; }
 
 			)();
 
@@ -69,7 +67,7 @@
 				/* browser not supported */
 				function() {
 					e.value += text;
-					return this;
+					return jQuery(e);
 				}
 
 			)();
